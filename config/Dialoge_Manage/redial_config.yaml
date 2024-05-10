@@ -1,0 +1,7 @@
+mode: "generation"
+tag: "Dialoge_Manage"
+base_model_path: "GritLM/GritLM-7B"
+target_model_path: "model_weights/ReFICR_qlora"
+gen_instr: "Analyze the conversation context: {}\nDetermine the user's intention and recommend a system dialogue action. Provide your explanation and suggested action in the following format:- Explanation: \n- Suggested Action: <a>dialogue action</a>"
+from_json: "training/CRS_data/redial/test_processed_all.jsonl"
+to_json: "training/CRS_data/redial/test_processed_action.jsonl"
