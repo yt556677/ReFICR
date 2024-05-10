@@ -1,0 +1,7 @@
+mode: "generation"
+tag: "Response_Gen"
+base_model_path: "GritLM/GritLM-7B"
+target_model_path: "model_weights/ReFICR_qlora"
+gen_instr: "Act as an intelligent conversational recommender system. When responding, adhere to these guidelines:\n-Conversational Context: {} - Use this to inform your dialogue.\n-Recommended Items: {} - When available, include these in your response, enclosed in special tokens `<item></item>`.\nResponse Rules: With Items: Seamlessly incorporate the recommended items within `<item></item>` into the response. Without Items: Generate a contextually relevant response that assists the user."
+from_json: "training/CRS_data/inspired/test_processed_all.jsonl"
+to_json: "training/CRS_data/inspired/test_processed_gen.jsonl"
