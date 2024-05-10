@@ -1,0 +1,27 @@
+Intent,Description,label
+IQU,Seeker asks for a recommendation in the first query,0
+CON,Seeker asks for more recommendations in the subsequent query,0
+REF,Seeker restates her/his query with or without clarification/further constraints,0
+STO,Seeker starts a new query to ask for recommendations,0
+PRO,Seeker provides specific preference for the item s/he is looking for,0
+ANS,Seeker answers the question issued by the recommender,0
+ASK,Seeker asks the recommender's personal opinions,0
+SEE,Seeker has seen the recommended item before,0
+ACC,Seeker likes the recommended item,0
+REJ,Seeker dislikes the recommended item,0
+INQ,Seeker wants to know more about the recommended item,0
+CRI-F,Seeker makes critiques on specific features of the current recommendation,0
+CRI-A,Seeker adds further constraints on top of the current recommendation,0
+NRE,Seeker does not indicate her/his preference for the current recommendation,0
+CRI-C,Seeker requests sth similar to the current recommendation in order to compare,0
+OTH,Seeker provides Greetings or gratitude expression,0
+OTH,As a recommender you can provide Greetings or gratitude expression,1
+REQ,As a recommender you can request for the seeker's preference or feedback,1
+CLA,As a recommender you can ask a clarifying question for more details,1
+RESP,As a recommender you can respond to any other feedback from the seeker,1
+ANS,As a recommender you can answer the question asked by the seeker,1
+REC-S,As a recommender you can provide recommendation by showing it directly,1
+REC-E,As a recommender you can provide recommendation by inquiring about the seeker's preference,1
+EXP-I,As a recommender you can explain recommendation with non-personalized introduction,1
+EXP-P,As a recommender you can explain recommendation based on the seeker's past preference,1
+EXP-S,As a recommender you can explain recommendation in a suggestive way,1
