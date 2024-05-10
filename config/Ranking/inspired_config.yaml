@@ -1,0 +1,6 @@
+mode: "generation"
+tag: "Ranking"
+base_model_path: "GritLM/GritLM-7B"
+target_model_path: "model_weights/ReFICR_qlora"
+gen_instr: "Rank the candidate items, each identified by a unique number in square brackets, based on their relevance score to the conversation context and referring to the retrieved knowledge. \nCandidate Items:\n{}Conversation context:\n{}\nRetrieved Knowledge: {}\nOutput the top {} results from most relevant to least relevant, listing the identifiers on separate lines."
+from_json: "training/CRS_data/inspired/test_processed_cand_rag.jsonl"
