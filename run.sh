@@ -1,8 +1,8 @@
 CUDA_VISIBLE_DEVICES=0 torchrun --nproc_per_node 1 --master_port 25900\
  -m training.run \
- --output_dir model_weights/ReFICR_emb \
+ --output_dir model_weights/ReFICR_qlora\
  --model_name_or_path GritLM/GritLM-7B \
- --train_data training/toy_data_instruct\
+ --train_data training/toy_data_instruct/ReFICR_Instruct\
  --learning_rate 2e-5 \
  --num_train_epochs 1 \
  --warmup_ratio 0.03 \
