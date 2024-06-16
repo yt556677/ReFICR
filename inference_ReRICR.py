@@ -9,8 +9,16 @@ import numpy as np
 from transformers import set_seed, AutoModel, AutoModelForCausalLM, AutoTokenizer
 from peft import get_peft_model, LoraConfig, TaskType,PeftModel
 import os
-from utils import search_number,extract_movie_name, recall_score
+from utils import search_number,extract_movie_name, recall_score, add_roles, is_float
 
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+        
 #merge the model weights
 def apply_lora(base_model_path, target_model_path):
 
@@ -47,14 +55,19 @@ def get_instruction(data, task_type, gen_instr):
             top_k_items = {k: cand_dict[k] for k in list(cand_dict)[:10]}
             cand_items = ""
             for key, value in top_k_items.items():
-                cand_items += f"[{str(key)}] {str(value)}\n"
-
+                cand_items += f"[{str(key)}] {str(value)}\n"             
+            
             rag_kg = example["re_kg"]
-            rag_kg_conv = example["re_kg"]["context"]
+            rag_kg = ' '.join([' '.join(kg) for kg in rag_kg])
+            """
+            rag_kg_conv = ' '.join(example["re_kg"]["context"][-4:])
+            #rag_kg_conv = add_roles(example["re_kg"]["context"])
             rag_kg_target = example["re_kg"]["target"]
-            retrieved_kg = f"Users with intentions similar to the current user were recommended {rag_kg_target[0]} by the system. The refered content is:{rag_kg_conv[-512:]}"
-                
+            retrieved_kg = f"Users with intentions similar to the current user were recommended {rag_kg_target[0]} by the system. The refered content is: {rag_kg_conv[-512:]}"
+            """
+            retrieved_kg = f"Users with intentions similar to the current user were recommended {rag_kg} by the system"  
             pre_prompt = gen_instr.format(cand_items,context[-512:],retrieved_kg,num)
+            #pre_prompt = gen_instr.format(cand_items,context[-512:],num)
 
         if task_type == "Dialoge_Manage":
             pre_prompt = gen_instr.format(context[-516:])
@@ -63,7 +76,7 @@ def get_instruction(data, task_type, gen_instr):
             recommend_item = " ".join(example["rec"])
             pre_prompt = gen_instr.format(context[-516:],recommend_item)
 
-        print("pre_prompt:",pre_prompt)
+        #print("pre_prompt:",pre_prompt)
         messages = [{ 
                         "role":"user",
                         "content":pre_prompt}]
@@ -73,11 +86,14 @@ def get_instruction(data, task_type, gen_instr):
     return output
 
 def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, gen_instr:str=None,from_json:str=None, db_json:str=None, embeddings_path:str=None, base_model_path:str="GritLM/GritLM-7B",
-    target_model_path:str=None, to_json:str=None, stored_cand_lst:bool=True):
+    target_model_path:str=None, to_json:str=None, stored_cand_lst:bool=True, is_lora:bool=True):
 
     
     set_seed(123)
-    model = apply_lora(base_model_path,target_model_path)
+    if is_lora:
+        model = apply_lora(base_model_path,target_model_path)
+    else:
+        model = GritLM("GritLM/GritLM-7B", torch_dtype="auto")
 
     with open(from_json) as fd:
         lines = fd.readlines()
@@ -155,9 +171,11 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
                 rank += rank_slice
                 print('length rank:',len(rank))
 
+
             print('length rank:',len(rank))
             print(recall_score(rec_lists,rank,ks=[1,5,10,20,50]))
 
+            
             if stored_cand_lst:
 
                 for i in range(len(rank)):
@@ -174,9 +192,16 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
 
         if tag == "Conv2Conv":
 
-            conv_docs = [example_k["context"] for example_k in db.values()]
-            conv_docs = [conv_doc[:1024] for conv_doc in conv_docs]
+            #conv_docs = [example_k["context"] for example_k in db.values()]
+            #conv_docs = [conv_doc[:1024] for conv_doc in conv_docs]
             
+            conv_docs = []
+            for dict_conv in db.values():
+                context = add_roles(dict_conv['context'])
+                conv_docs.append(context)
+            print("conv_doc:", conv_docs[0])    
+            print('length of conv_docs:',len(conv_docs))
+
             if os.path.exists(embeddings_path):
                 print("loading embeddings form file")
                 conv_d_rep = torch.load(embeddings_path)
@@ -198,6 +223,23 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
             print("conv_q_rep:",conv_q_rep.shape)
             print("conv_cos_similarities:",conv_cos_similarities.shape)
 
+
+            cos_similarities = conv_cos_similarities
+            topk_conv_values,topk_conv_indices = torch.topk(cos_similarities,k=5,dim=-1)
+            conv_indices = topk_conv_indices.tolist()
+            print("cos_similarities:",cos_similarities.shape)
+            print("topk_conv_values:",topk_conv_values.shape)
+            print("topk_conv_indices:",topk_conv_indices.shape)
+            for i in range(len(conv_indices)):
+                re_kg = [db[str(conv_indices[i][j])]['target'] for j in range(5)]
+                data[i]["re_kg"] = re_kg
+
+            with open(to_json,"w",encoding="utf-8") as fr:
+                for example in data:
+                    fr.write(json.dumps(example))
+                    fr.write("\n")
+
+            """
             cos_similarities = conv_cos_similarities
             topk_conv_values,topk_conv_indices = torch.topk(cos_similarities,k=1,dim=-1)
             conv_indices = topk_conv_indices.tolist()
@@ -205,7 +247,7 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
             print("topk_conv_values:",topk_conv_values.shape)
             print("topk_conv_indices:",topk_conv_indices.shape)
             for i in range(len(conv_indices)):
-                print(conv_indices[i][0])
+                #print(conv_indices[i][0])
                 re_kg = db[str(conv_indices[i][0])]
                 sim_value = topk_conv_values[i][0]
                 #print("re_kg:",re_kg)
@@ -216,7 +258,7 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
             with open(to_json,"w",encoding="utf-8") as fr:
                 for example in data:
                     fr.write(json.dumps(example))
-                    fr.write("\n")
+                    fr.write("\n")"""
 
     if mode == "generation":
         outputs = get_instruction(data,tag,gen_instr)
@@ -237,10 +279,26 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
                 generated = decoded[0].split("<|assistant|>\n")[-1].replace("</s>","").split("\n")
                 clean_generated_rank = []
 
-                for each_rank in generated:
+                """for each_rank in generated:
                     if len(search_number(each_rank))==0:
                         continue
-                    clean_generated_rank.append(int(search_number(each_rank)))
+                    clean_generated_rank.append(int(search_number(each_rank)))"""
+
+                rank_score = {}
+                for each_rank in generated:
+                    result = each_rank.split(",")
+                    #print("result:",result)
+                    if len(search_number(result[0]))==0:
+                        continue
+
+                    if is_float(result[-1]):
+                        identity = int(search_number(result[0]))
+                        rank_score[identity] = float(result[-1].strip())
+                        #print("rank_score:",rank_score)
+                        clean_generated_rank = sorted(rank_score, key=rank_score.get, reverse=True)
+
+                    else:
+                        clean_generated_rank.append(int(search_number(each_rank)))
 
                 print(clean_generated_rank)
                 rank.append(clean_generated_rank)
@@ -267,7 +325,7 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
 
             with open(to_json,"w",encoding="utf-8") as fout:
                 for e_id in range(len(data)):
-                    print("pred[e_id]:", pred[e_id])
+                    #print("pred[e_id]:", pred[e_id])
                     data[e_id]["action"] = pred[e_id]
                     fout.write(json.dumps(data[e_id],ensure_ascii=False))
                     fout.write("\n")
