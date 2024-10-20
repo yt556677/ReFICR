@@ -58,8 +58,8 @@ CUDA_VISIBLE_DEVICES=0 torchrun --nproc_per_node 1 --master_port 25900\
 ### Response Generation
 `CUDA_VISIBLE_DEVICES=0 python inference_ReRICR.py --config config/Response_Gen/inspired_config.yaml`
 
-## Notes
-you need to simply replace the modeling_mistral.py files in your transformers installation with modeling_mistral.py in order to use the bidirectional attention. More details can be found in [ContextualAI/gritlm](https://github.com/ContextualAI/gritlm).
+## Note
+you need to simply replace the modeling_mistral.py file in your transformers installation with modeling_mistral.py in order to use the bidirectional attention. More details can be found in [ContextualAI/gritlm](https://github.com/ContextualAI/gritlm).
 
 ## Acknowledgement
 [ContextualAI/gritlm](https://github.com/ContextualAI/gritlm) This repository is built upon gritlm!
