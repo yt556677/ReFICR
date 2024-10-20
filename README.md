@@ -6,7 +6,7 @@
 ### Data
 You can download the instruction data from the link
 
-https://drive.google.com/file/d/1AwTXjDt2JrwIuqc0bKM23ouw0kEufHA0/view?usp=drive_link
+https://drive.google.com/file/d/1U_45qCHXpiArW_BCkKOhVfOQn23J4pUA/view?usp=drive_link
 
 place it in the directory (training/toy_data_instruct/ReFICR_Instruct)
 
