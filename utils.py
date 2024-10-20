@@ -2,6 +2,21 @@ import re
 from collections import defaultdict
 import numpy as np
 
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def add_roles(context, trunc=4):
+    role = ['Recommender','Seeker']
+    for i in range(len(context)):
+        context[i] = role[i%2] + ": " + context[i]
+
+    context = ' '.join(context[-4:])
+    return context
+
 def search_number(text):
     match = re.search(r'\[(\d+)\]', text)
 
@@ -22,8 +37,8 @@ def del_space(text):
 
 def extract_movie_name(text):
     text = text.replace("-"," ")
-    #text = del_space(del_parentheses(text))
-    text = del_space(text)
+    text = del_space(del_parentheses(text))
+    #text = del_space(text)
     text = text.lower()
     return text
 
