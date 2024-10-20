@@ -21,7 +21,7 @@ CUDA_VISIBLE_DEVICES=0 torchrun --nproc_per_node 1 --master_port 25900\
  --model_name_or_path GritLM/GritLM-7B \
  --train_data training/toy_data_instruct/ReFICR_Instruct\
  --learning_rate 2e-5 \
- --num_train_epochs 1 \
+ --num_train_epochs 2 \
  --warmup_ratio 0.03 \
  --per_device_train_batch_size 2 \
  --gradient_accumulation_steps 1 \
@@ -47,7 +47,7 @@ CUDA_VISIBLE_DEVICES=0 torchrun --nproc_per_node 1 --master_port 25900\
 
 ## Inference
 ### Recommendation
-#### The performance of retrieved candiates(Conv2Item)
+#### The performance of retrieved candiate items(Conv2Item)
 `CUDA_VISIBLE_DEVICES=0 python inference_ReRICR.py --config config/Conv2Item/inspired_config.yaml`
 #### The performance of ranking(Conv2Conv + Ranking)
 `CUDA_VISIBLE_DEVICES=0 python inference_ReRICR.py --config config/Conv2Conv/inspired_config.yaml`
@@ -57,6 +57,9 @@ CUDA_VISIBLE_DEVICES=0 torchrun --nproc_per_node 1 --master_port 25900\
 `CUDA_VISIBLE_DEVICES=0 python inference_ReRICR.py --config config/Dialoge_Manage/inspired_config.yaml`
 ### Response Generation
 `CUDA_VISIBLE_DEVICES=0 python inference_ReRICR.py --config config/Response_Gen/inspired_config.yaml`
+
+## Notes
+you need to simply replace the modeling_mistral.py files in your transformers installation with modeling_mistral.py in order to use the bidirectional attention. More details can be found in [ContextualAI/gritlm](https://github.com/ContextualAI/gritlm).
 
 ## Acknowledgement
 [ContextualAI/gritlm](https://github.com/ContextualAI/gritlm) This repository is built upon gritlm!
