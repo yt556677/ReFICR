@@ -13,8 +13,6 @@ from utils import search_number,extract_movie_name, recall_score, add_roles, is_
 
 from rank_bm25 import BM25Okapi
 from llm2vec import LLM2Vec
-#from huggingface_hub import login
-#login(token="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")
 
 def is_float(value):
     try:
@@ -385,6 +383,8 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
             gen = model.generate(encoded, max_new_tokens=1024, do_sample=False, pad_token_id=2)
             decoded = model.tokenizer.batch_decode(gen)
             print(decoded[0].encode("utf-8").decode("latin1"))
+            generated = decoded[0].split("<|assistant|>\n")[-1].replace("</s>","")
+            pred.append(generated)
 
             if tag == "Ranking":
 
@@ -447,7 +447,7 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
 
         if tag == "Response_Gen":
 
-            assert len(pred_response) == len(data)
+            assert len(pred) == len(data)
 
             with open(to_json,"w",encoding="utf-8") as fout:
                 for e_id in range(len(data)):
