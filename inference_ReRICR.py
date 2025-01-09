@@ -419,8 +419,8 @@ def main(mode:str=None, tag:str=None, query_instr:str=None, doc_instr:str=None, 
                 rank.append(clean_generated_rank)
                 rank_len.append(len(clean_generated_rank))
 
-            generated = decoded[0].split("<|assistant|>\n")[-1].replace("</s>","").replace("\n","").strip()
-            pred.append(generated)
+            # generated = decoded[0].split("<|assistant|>\n")[-1].replace("</s>","").replace("\n","").strip()
+            # pred.append(generated)
 
 
         if tag == "Ranking":
